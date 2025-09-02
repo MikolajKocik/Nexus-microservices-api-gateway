@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nexus.ApiGateway.Extensions;
 using Nexus.ApiGateway.Features.Products;
-using Nexus.ApiGateway.Jobs;
 using Nexus.ApiGateway.Persistence;
 using Nexus.ApiGateway.Validators;
 
@@ -16,8 +15,9 @@ builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, relo
 
 // Hangfire
 builder.Services.AddHangfire(config =>
-    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
-builder.Services.AddHangfireServer();
+    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer(options =>
+    options.SchedulePollingInterval = TimeSpan.FromSeconds(1));
 
 // API Versioning
 builder.Services.AddApiVersioning(options =>
@@ -51,22 +51,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 WebApplication app = builder.Build();
 
 app.UseHangfireDashboard("/hangfire");
-
-app.MapWhen(ctx => ctx.Request.Path == "/start-hangfire", subApp =>
-{
-    subApp.Run(async ctx =>
-    {
-        using (IServiceScope scope = app.Services.CreateScope())
-        {
-            IRecurringJobManager recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
-            recurringJobManager.AddOrUpdate<SendReportJob>(
-                "send-report",
-                job => job.ExecuteAsync(),
-                Cron.Hourly);
-        }
-        await ctx.Response.WriteAsync("Hangfire job scheduled.");
-    });
-});
 
 app.UseApiVersioning();
 
