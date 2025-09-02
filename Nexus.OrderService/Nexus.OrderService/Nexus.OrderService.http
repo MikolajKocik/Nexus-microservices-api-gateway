@@ -1,0 +1,6 @@
+@Nexus.OrderService_HostAddress = http://localhost:5241
+
+GET {{Nexus.OrderService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
