@@ -2,6 +2,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nexus.ApiGateway.Extensions;
+using Nexus.ApiGateway.Features.Orders;
 using Nexus.ApiGateway.Features.Products;
 using Nexus.ApiGateway.Persistence;
 using Nexus.ApiGateway.Validators;
@@ -41,6 +42,8 @@ builder.Services.AddHttpClient("ProductService")
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddOpenApi();
 

@@ -5,4 +5,10 @@ public sealed class Product
     public int Id { get; private set; }
     public string Name { get; private set; } = default!;
     public decimal Price { get; private set; }  
+
+    public Product(string name, decimal price)
+    {
+        Name = name;
+        Price = price;
+    }
 }
