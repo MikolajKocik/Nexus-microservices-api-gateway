@@ -180,3 +180,4 @@ csx/
 # MSBuild Binary and Structured Log
 *.binlog
 MSBuild_Logs/
+*/appsettings.local.json
