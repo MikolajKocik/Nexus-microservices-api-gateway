@@ -1,7 +1,7 @@
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Nexus.ApiGateway.Persistence;
+using Nexus.OrderService.Persistence;
 using Nexus.OrderService.Features.Orders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +48,15 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+using IServiceScope scope = app.Services.CreateScope();
+AppDbContext dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+dbContext.Database.GetPendingMigrationsAsync().ContinueWith(migrations =>
+{
+    if (migrations.Result.Any())
+    {
+        dbContext.Database.Migrate();
+    }
+}).Wait();
 
 app.UseApiVersioning();
 
@@ -57,4 +66,4 @@ app.UseRouting();
 app.UseHttpsRedirection();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
