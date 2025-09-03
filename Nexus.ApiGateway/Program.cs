@@ -9,12 +9,16 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // ocelot + json
 builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", false, false)
-    .AddJsonFile("ocelot.json", false, false)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: false, reloadOnChange: false)
+    .AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: false)
+    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: false)
     .AddOcelot(builder.Environment);
 
 // register custom Ocelot file configuration repository 
 builder.Services.AddSingleton<IFileConfigurationRepository, OcelotConfigProvider>();
+
+// JWT authentication for gateway endpoints secured by Ocelot AuthenticationOptions
+JsonWebTokenConfig.Configure(builder);
 
 builder.Services.AddOcelot(builder.Configuration)
     .AddCacheManager(options =>
@@ -56,6 +60,9 @@ WebApplication app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseHttpLogging();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // health endpoint
 app.MapHealthChecks("/health");
